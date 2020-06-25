@@ -2,7 +2,9 @@
 import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import filedialog
+from tkinter import messagebox
 import os
+from moviepy.editor import *
 
 
 class VideoToAudio(tk.Frame):
@@ -82,19 +84,16 @@ class VideoToAudio(tk.Frame):
         # Ask user to select file to convert
         mp4_file = tk.Entry(input_frame, width = 40, borderwidth = 2)
         mp4_file.grid(row = 0, column = 0)
-        mp4_file.insert(0, "Select MP4 file you want to convert")
+        mp4_file.insert(0, "Choose a file to convert")
 
         # User upload mp4 file to convert
         def uploadFile(event = None):
-            filename = filedialog.askopenfilename()
+            filename = filedialog.askopenfilename(filetypes = [('MPEG4 video file', '*.mp4')])
             mp4_file.delete(0, 'end')
             mp4_file.insert(0, filename)
 
-            # Filename and path
+            # File
             file = mp4_file.get()
-
-            file_path = file[ : file.rfind('/') + 1] if (os.name != 'nt') \
-                else file[ : file.rfind('\\')]
 
             filename = file[file.rfind('/') + 1 : file.rfind('.')] if (os.name != 'nt') \
                 else file[file.rfind('\\') + 1 : file.rfind('.')]
@@ -114,8 +113,39 @@ class VideoToAudio(tk.Frame):
             mp3_file.insert(0, filename + '.mp3')
 
         def downloadFile(event = None):
-            mp3_filename = None
-            print(f"Converting {mp4_file.get()} to {mp3_file.get()}")
+            file = mp4_file.get()
+            file_path = file[ : file.rfind('/') + 1] if (os.name != 'nt') \
+                else file[ : file.rfind('\\')]
+
+            if '.mp4' in file:
+                print(f"Converting {mp4_file.get()} to {file_path}{mp3_file.get()}")
+
+                wait_message = tk.messagebox.showinfo(title = "File converting",
+                    message = "Please wait while file is being converted to mp3")
+
+                # Start converting using moviepy
+                video_clip = VideoFileClip(mp4_file.get()) # The mp4 file (video)
+                audio_clip = video_clip.audio # Extracting the audio from mp4 file
+                audio_clip.write_audiofile(file_path + mp3_file.get())
+
+                audio_clip.close()
+                video_clip.close()
+
+                complete_frame = tk.Frame(self.mainframe, background = 'white')
+                complete_frame.grid(row = 2, column = 0, sticky = ('N', 'S', 'E', 'W'))
+
+                for i in range(3):
+                    complete_frame.columnconfigure(i, weight = 1)
+
+                for i in range(2):
+                    complete_frame.rowconfigure(i, weight = 1)
+
+                complete_message = tk.Label(self.mainframe, text = "Done",
+                    font = ('Times', 32), fg = 'Blue', background = 'white')
+                complete_message.grid(row = 3, column = 0, sticky = ('N', 'S', 'W', 'E'))
+            else:
+                mp4_file.delete(0, 'end')
+                mp4_file.insert(0, 'Please choose a file')
 
         download_mp3 = tk.Button(input_frame, text = "Convert", command = downloadFile)
         download_mp3.grid(row = 1, column = 1)
