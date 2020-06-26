@@ -98,7 +98,8 @@ class VideoToAudio(tk.Frame):
             filename = file[file.rfind('/') + 1 : file.rfind('.')] if (os.name != 'nt') \
                 else file[file.rfind('\\') + 1 : file.rfind('.')]
 
-            uploaded(filename)
+            mp3_file.delete(0, 'end')
+            mp3_file.insert(0, filename + '.mp3')
 
         upload_mp4 = tk.Button(input_frame, text = "Open", command = uploadFile)
         upload_mp4.grid(row = 0, column = 1)
@@ -108,9 +109,6 @@ class VideoToAudio(tk.Frame):
         mp3_file.grid(row = 1, column = 0)
         mp3_file.insert(0, 'default.mp3')
 
-        def uploaded(filename):
-            mp3_file.delete(0, 'end')
-            mp3_file.insert(0, filename + '.mp3')
 
         def downloadFile(event = None):
             file = mp4_file.get()
